@@ -1,12 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { getSeoulToday, diffDays } from "@/lib/dday";
+import { getSeoulToday } from "@/lib/dday";
+import { fetchPlanTasksByEmployee, summarizeTasks } from "@/lib/plan-progress";
 import { MemberRow } from "@/components/member-row";
-import { PendingTaskCard } from "./pending-task-card";
-import type { PlanTask } from "@/lib/types";
+import { PendingTaskCard } from "@/components/pending-task-card";
 
 export const dynamic = "force-dynamic";
-
-type TaskWithPlan = PlanTask & { plan_id: string };
 
 export default async function MentorPage() {
   const supabase = await createClient();
@@ -39,46 +37,20 @@ export default async function MentorPage() {
     new Set(menteeList.map((m) => m.team_id).filter((v): v is string => Boolean(v)))
   );
 
-  const [{ data: teams }, { data: plans }] = await Promise.all([
-    teamIds.length
-      ? supabase.from("teams").select("id, name").in("id", teamIds)
-      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
-    supabase.from("plans").select("id, employee_id").in("employee_id", menteeIds),
-  ]);
-
+  const { data: teams } = teamIds.length
+    ? await supabase.from("teams").select("id, name").in("id", teamIds)
+    : { data: [] as { id: string; name: string }[] };
   const teamNameById = new Map((teams ?? []).map((t) => [t.id, t.name]));
-  const planList = plans ?? [];
-  const planIdByEmployee = new Map(planList.map((p) => [p.employee_id, p.id]));
-  const employeeIdByPlan = new Map(planList.map((p) => [p.id, p.employee_id]));
-  const planIds = planList.map((p) => p.id);
 
-  const { data: allTasks } = planIds.length
-    ? await supabase
-        .from("plan_tasks")
-        .select(
-          "id, plan_id, title, description, owner_role, assignee_id, due_date, phase, is_required, sort_order, status, reject_reason"
-        )
-        .in("plan_id", planIds)
-        .order("due_date", { ascending: true })
-    : { data: [] as TaskWithPlan[] };
-
-  const tasks: TaskWithPlan[] = allTasks ?? [];
-
-  const tasksByEmployee = new Map<string, TaskWithPlan[]>();
-  for (const task of tasks) {
-    const employeeId = employeeIdByPlan.get(task.plan_id);
-    if (!employeeId) continue;
-    const list = tasksByEmployee.get(employeeId);
-    if (list) list.push(task);
-    else tasksByEmployee.set(employeeId, [task]);
-  }
+  const { planIdByEmployee, employeeIdByPlan, tasksByEmployee, allTasks } =
+    await fetchPlanTasksByEmployee(supabase, menteeIds);
 
   const nameById = new Map(menteeList.map((m) => [m.id, m.full_name]));
-  const pendingTasks = tasks
+  const pendingTasks = allTasks
     .filter((t) => t.status === "pending")
-    .map((t) => ({
-      task: t,
-      menteeName: nameById.get(employeeIdByPlan.get(t.plan_id) ?? "") ?? "",
+    .map((task) => ({
+      task,
+      menteeName: nameById.get(employeeIdByPlan.get(task.plan_id) ?? "") ?? "",
     }));
 
   return (
@@ -122,14 +94,10 @@ export default async function MentorPage() {
         >
           담당 신입
         </h2>
-        <div>
+        <div className="overflow-x-auto">
           {menteeList.map((mentee) => {
-            const menteeTasks = tasksByEmployee.get(mentee.id) ?? [];
-            const total = menteeTasks.length;
-            const done = menteeTasks.filter((t) => t.status === "done").length;
-            const overdueCount = menteeTasks.filter(
-              (t) => t.status !== "done" && diffDays(t.due_date, today) < 0
-            ).length;
+            const tasks = tasksByEmployee.get(mentee.id) ?? [];
+            const { total, done, overdueCount, worstTask } = summarizeTasks(tasks, today);
             const planId = planIdByEmployee.get(mentee.id);
             if (!planId) return null;
             return (
@@ -141,6 +109,8 @@ export default async function MentorPage() {
                 done={done}
                 total={total}
                 overdueCount={overdueCount}
+                worstTask={worstTask}
+                today={today}
               />
             );
           })}

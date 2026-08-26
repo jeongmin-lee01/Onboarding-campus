@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DdayBadge, RequiredBadge } from "@/components/badges";
 import { approveTask } from "@/lib/actions/plan-tasks";
-import { RejectDialog } from "./reject-dialog";
+import { RejectDialog } from "@/components/reject-dialog";
 import type { PlanTask } from "@/lib/types";
 
 export function PendingTaskCard({

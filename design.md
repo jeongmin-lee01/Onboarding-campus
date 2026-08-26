@@ -140,6 +140,7 @@ body { font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif
 - 헤더: 높이 56px, `--bg-subtle` 배경, 하단 1px `--border`, 스크롤 시 상단 고정
 - 본문 최대폭: 신입/사수 화면 **880px**, 팀장/인사 대시보드 **1100px**
 - 좌우 여백: PC 32px, 모바일 16px
+- 인사담당자로 로그인했을 때는 로고 옆에 `전사 대시보드`·`구성원 목록` 링크가 추가된다 (/admin ↔ /admin/members 이동용). 다른 역할은 헤더가 위 구성 그대로다.
 
 ### 5.2 화면별 밀도
 

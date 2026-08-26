@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ProgressBar } from "@/components/progress-bar";
+import { DdayBadge } from "@/components/badges";
 
 /** design.md 6.5 대시보드 인원 행. /mentor·/team·/admin에서 공통으로 쓴다. */
 export function MemberRow({
@@ -8,6 +10,8 @@ export function MemberRow({
   done,
   total,
   overdueCount,
+  worstTask,
+  today,
 }: {
   name: string;
   teamLabel: string;
@@ -15,11 +19,14 @@ export function MemberRow({
   done: number;
   total: number;
   overdueCount: number;
+  /** 미완료 태스크 중 가장 급한 것. 없으면 표시하지 않는다. */
+  worstTask: { due_date: string; status: string } | null;
+  today: string;
 }) {
   return (
     <Link
       href={`/plan/${planId}`}
-      className="flex h-11 items-center gap-4 px-2 transition-colors duration-150 hover:bg-[var(--bg-subtle)]"
+      className="flex h-11 min-w-[560px] items-center gap-4 px-2 transition-colors duration-150 hover:bg-[var(--bg-subtle)]"
       style={{ borderBottom: "1px solid var(--border)" }}
     >
       <span
@@ -34,19 +41,7 @@ export function MemberRow({
       >
         {teamLabel}
       </span>
-      <div
-        className="h-1.5 flex-1 overflow-hidden"
-        style={{ background: "var(--bg-sunken)", borderRadius: 999 }}
-      >
-        <div
-          className="h-full"
-          style={{
-            width: total ? `${(done / total) * 100}%` : "0%",
-            background: "var(--accent)",
-            borderRadius: 999,
-          }}
-        />
-      </div>
+      <ProgressBar done={done} total={total} className="flex-1" />
       <span className="mono w-14 shrink-0 text-right" style={{ fontSize: 13, color: "var(--text-muted)" }}>
         {done}/{total}
       </span>
@@ -62,6 +57,9 @@ export function MemberRow({
         >
           지연 {overdueCount}
         </span>
+      )}
+      {worstTask && (
+        <DdayBadge dueDate={worstTask.due_date} status={worstTask.status} today={today} />
       )}
     </Link>
   );

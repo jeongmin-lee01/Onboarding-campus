@@ -12,6 +12,7 @@ import {
 } from "@/lib/dday";
 import { TaskCard } from "@/components/task-card";
 import { CompleteRequestButton } from "@/components/complete-request-button";
+import { RevertButton } from "@/components/revert-button";
 import type { PlanTask } from "@/lib/types";
 
 type Row =
@@ -86,6 +87,7 @@ export function Checklist({
   assigneeLabels,
   initialToday,
   readOnly = false,
+  allowRevert = false,
 }: {
   tasks: PlanTask[];
   currentUserId: string;
@@ -94,6 +96,8 @@ export function Checklist({
   initialToday: string;
   /** true면 완료 요청 버튼을 렌더링하지 않는다 (사수/팀장/인사 등 제3자 조회용). */
   readOnly?: boolean;
+  /** true면 완료(done) 카드에 되돌리기 버튼을 보여준다 (인사담당자 전용). */
+  allowRevert?: boolean;
 }) {
   const [today, setToday] = useState(initialToday);
 
@@ -189,6 +193,12 @@ export function Checklist({
           const task = row.task;
           const isMine = !readOnly && task.assignee_id === currentUserId;
           const canRequest = isMine && (task.status === "todo" || task.status === "rejected");
+          const canRevert = allowRevert && task.status === "done";
+          const action = canRequest ? (
+            <CompleteRequestButton taskId={task.id} />
+          ) : canRevert ? (
+            <RevertButton taskId={task.id} />
+          ) : undefined;
           return (
             <div key={task.id} className="flex gap-3 pb-3">
               <RailGutter node={task.status === "done" ? "done" : "pending"} />
@@ -198,7 +208,7 @@ export function Checklist({
                   today={today}
                   isMine={isMine}
                   assigneeLabel={assigneeLabels[task.id] ?? null}
-                  action={canRequest ? <CompleteRequestButton taskId={task.id} /> : undefined}
+                  action={action}
                 />
               </div>
             </div>

@@ -20,6 +20,13 @@ export default async function PlanDetailPage({
 
   if (!user) return null;
 
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  const allowRevert = viewer?.role === "hr";
+
   const { data: plan } = await supabase
     .from("plans")
     .select("id, employee_id")
@@ -104,6 +111,7 @@ export default async function PlanDetailPage({
         assigneeLabels={assigneeLabels}
         initialToday={getSeoulToday()}
         readOnly
+        allowRevert={allowRevert}
       />
     </div>
   );
