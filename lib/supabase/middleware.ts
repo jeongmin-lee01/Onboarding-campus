@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
   const role = profile?.role;
   const home = (role && ROLE_HOME[role]) || "/login";
 
-  if (isLoginPage || isRoot) {
+  if ((isLoginPage || isRoot) && path !== home) {
     const url = request.nextUrl.clone();
     url.pathname = home;
     return NextResponse.redirect(url);
