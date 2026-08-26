@@ -1,79 +1,23 @@
-import {
-  diffDays,
-  formatDday,
-  getDdayTone,
-  TONE_COLOR,
-  STATUS_TONE_COLOR,
-  STATUS_LABEL,
-} from "@/lib/dday";
-import { CompleteRequestButton } from "./complete-request-button";
-import type { PlanTask } from "./types";
-
-function DdayBadge({ dueDate, status, today }: { dueDate: string; status: string; today: string }) {
-  const diff = diffDays(dueDate, today);
-  const tone = getDdayTone(diff, status);
-  const { fg, bg } = TONE_COLOR[tone];
-  const label = formatDday(diff);
-
-  return (
-    <span
-      className="mono shrink-0 rounded-sm px-2 py-0.5"
-      style={{
-        fontSize: 12,
-        fontWeight: label === "D-Day" ? 600 : 500,
-        color: fg,
-        background: bg,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const { fg, bg } = STATUS_TONE_COLOR[status] ?? STATUS_TONE_COLOR.todo;
-  return (
-    <span
-      className="shrink-0 rounded-sm px-2 py-0.5"
-      style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.01em", color: fg, background: bg }}
-    >
-      {STATUS_LABEL[status] ?? status}
-    </span>
-  );
-}
-
-function RequiredBadge() {
-  return (
-    <span
-      className="shrink-0 rounded-sm px-2 py-0.5"
-      style={{
-        fontSize: 12,
-        fontWeight: 500,
-        letterSpacing: "0.01em",
-        color: "var(--text-muted)",
-        background: "var(--bg-sunken)",
-      }}
-    >
-      필수
-    </span>
-  );
-}
+import { DdayBadge, StatusBadge, RequiredBadge } from "@/components/badges";
+import type { PlanTask } from "@/lib/types";
 
 export function TaskCard({
   task,
   today,
   isMine,
   assigneeLabel,
+  action,
 }: {
   task: PlanTask;
   today: string;
   isMine: boolean;
-  /** 본인 담당이 아닐 때 메타 우측에 보여줄 담당자 이름(또는 역할). */
+  /** isMine이 아닐 때 메타 우측에 보여줄 담당자 이름(또는 역할). */
   assigneeLabel: string | null;
+  /** 메타 우측 액션 슬롯. 없으면 아무것도 렌더링하지 않는다. */
+  action?: React.ReactNode;
 }) {
   const isDone = task.status === "done";
   const isRejected = task.status === "rejected";
-  const canRequest = isMine && (task.status === "todo" || task.status === "rejected");
 
   return (
     <div
@@ -122,7 +66,7 @@ export function TaskCard({
         <span style={{ fontSize: 13, lineHeight: "18px", color: "var(--text-faint)" }}>
           {isMine ? "내 담당" : assigneeLabel}
         </span>
-        {canRequest && <CompleteRequestButton taskId={task.id} />}
+        {action}
       </div>
     </div>
   );

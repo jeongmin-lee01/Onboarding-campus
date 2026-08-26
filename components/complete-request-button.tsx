@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { requestCompletion } from "./actions";
+import { requestCompletion } from "@/lib/actions/plan-tasks";
 
 export function CompleteRequestButton({ taskId }: { taskId: string }) {
   const [isPending, startTransition] = useTransition();

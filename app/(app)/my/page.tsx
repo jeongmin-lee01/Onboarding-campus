@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSeoulToday } from "@/lib/dday";
 import { ROLE_LABEL } from "@/lib/roles";
-import { Checklist } from "./checklist";
-import type { PlanTask } from "./types";
+import { Checklist } from "@/components/checklist";
+import type { PlanTask } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 

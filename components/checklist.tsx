@@ -10,8 +10,9 @@ import {
   PHASE_ORDER,
   type Phase,
 } from "@/lib/dday";
-import { TaskCard } from "./task-card";
-import type { PlanTask } from "./types";
+import { TaskCard } from "@/components/task-card";
+import { CompleteRequestButton } from "@/components/complete-request-button";
+import type { PlanTask } from "@/lib/types";
 
 type Row =
   | { type: "phase"; phase: Phase }
@@ -84,12 +85,15 @@ export function Checklist({
   currentUserId,
   assigneeLabels,
   initialToday,
+  readOnly = false,
 }: {
   tasks: PlanTask[];
   currentUserId: string;
-  /** task.id -> "본인 담당이 아닌 태스크"의 메타 우측에 보여줄 텍스트 */
+  /** task.id -> 메타 우측에 보여줄 담당자 텍스트. readOnly일 때는 모든 태스크에 대해 채워줘야 한다. */
   assigneeLabels: Record<string, string>;
   initialToday: string;
+  /** true면 완료 요청 버튼을 렌더링하지 않는다 (사수/팀장/인사 등 제3자 조회용). */
+  readOnly?: boolean;
 }) {
   const [today, setToday] = useState(initialToday);
 
@@ -183,7 +187,8 @@ export function Checklist({
             );
           }
           const task = row.task;
-          const isMine = task.assignee_id === currentUserId;
+          const isMine = !readOnly && task.assignee_id === currentUserId;
+          const canRequest = isMine && (task.status === "todo" || task.status === "rejected");
           return (
             <div key={task.id} className="flex gap-3 pb-3">
               <RailGutter node={task.status === "done" ? "done" : "pending"} />
@@ -193,6 +198,7 @@ export function Checklist({
                   today={today}
                   isMine={isMine}
                   assigneeLabel={assigneeLabels[task.id] ?? null}
+                  action={canRequest ? <CompleteRequestButton taskId={task.id} /> : undefined}
                 />
               </div>
             </div>
