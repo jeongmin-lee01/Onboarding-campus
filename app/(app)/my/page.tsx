@@ -1,12 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSeoulToday } from "@/lib/dday";
 import { ROLE_LABEL } from "@/lib/roles";
-import { Checklist } from "@/components/checklist";
+import { Checklist, type TaskFilter } from "@/components/checklist";
 import type { PlanTask } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function MyPage() {
+const VALID_FILTERS: TaskFilter[] = ["all", "active", "done"];
+
+export default async function MyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
+  const { filter } = await searchParams;
+  const initialFilter: TaskFilter = VALID_FILTERS.includes(filter as TaskFilter)
+    ? (filter as TaskFilter)
+    : "all";
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -64,6 +75,8 @@ export default async function MyPage() {
         currentUserId={user.id}
         assigneeLabels={assigneeLabels}
         initialToday={getSeoulToday()}
+        initialFilter={initialFilter}
+        viewerRole="newbie"
       />
     </div>
   );

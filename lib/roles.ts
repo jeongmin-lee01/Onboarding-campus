@@ -19,3 +19,15 @@ export const PROTECTED_PREFIXES: { prefix: string; roles: string[] }[] = [
   { prefix: "/admin", roles: ["hr"] },
   { prefix: "/plan", roles: ["mentor", "leader", "hr"] },
 ];
+
+/** task.owner_role -> 이 태스크를 볼 수 있는 뷰어 role 목록. 담당 등급 이상만 볼 수 있다. */
+const TASK_VISIBLE_TO: Record<string, string[]> = {
+  newbie: ["newbie", "mentor", "leader", "hr"],
+  mentor: ["mentor", "leader", "hr"],
+  leader: ["leader", "hr"],
+  hr: ["hr"],
+};
+
+export function canViewTask(viewerRole: string, ownerRole: string): boolean {
+  return TASK_VISIBLE_TO[ownerRole]?.includes(viewerRole) ?? true;
+}

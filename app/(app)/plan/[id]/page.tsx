@@ -112,6 +112,7 @@ export default async function PlanDetailPage({
         initialToday={getSeoulToday()}
         readOnly
         allowRevert={allowRevert}
+        viewerRole={viewer?.role ?? ""}
       />
     </div>
   );

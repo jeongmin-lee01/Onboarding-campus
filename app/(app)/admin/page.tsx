@@ -4,6 +4,7 @@ import { fetchPlanTasksByEmployee, summarizeTasks } from "@/lib/plan-progress";
 import { MemberRow } from "@/components/member-row";
 import { ProgressBar } from "@/components/progress-bar";
 import { PendingTaskCard } from "@/components/pending-task-card";
+import { MyTaskCard } from "@/components/my-task-card";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,12 @@ export default async function AdminPage() {
       task,
       menteeName: nameById.get(employeeIdByPlan.get(task.plan_id) ?? "") ?? "",
     }));
+  const myTasks = allTasks
+    .filter((t) => t.assignee_id === user.id && (t.status === "todo" || t.status === "rejected"))
+    .map((task) => ({
+      task,
+      menteeName: nameById.get(employeeIdByPlan.get(task.plan_id) ?? "") ?? "",
+    }));
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-8">
@@ -85,6 +92,32 @@ export default async function AdminPage() {
       </h1>
 
       <section className="mt-6 mb-10">
+        <h2
+          className="mb-3"
+          style={{
+            fontSize: 15,
+            lineHeight: "20px",
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+            color: "var(--text)",
+          }}
+        >
+          내가 처리할 항목
+        </h2>
+        {myTasks.length === 0 ? (
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            내가 처리할 항목이 없습니다.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {myTasks.map(({ task, menteeName }) => (
+              <MyTaskCard key={task.id} task={task} today={today} menteeName={menteeName} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mb-10">
         <h2
           className="mb-3"
           style={{

@@ -24,6 +24,9 @@ export async function requestCompletion(taskId: string) {
   }
 
   revalidatePath("/my");
+  revalidatePath("/mentor");
+  revalidatePath("/admin");
+  revalidatePath("/team");
   return { error: null };
 }
 
