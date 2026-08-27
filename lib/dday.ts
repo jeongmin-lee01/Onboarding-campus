@@ -51,6 +51,13 @@ export const TONE_COLOR: Record<DdayTone, { fg: string; bg: string }> = {
   normal: { fg: "var(--st-normal)", bg: "var(--st-normal-bg)" },
 };
 
+/** 입사일 기준 "입사 N일차" / "입사 D-N" 라벨. 사수·팀장·인사 화면의 신입 그룹 헤더에 쓴다. */
+export function formatHireDayLabel(hireDate: string, today: string): string {
+  const diff = diffDays(hireDate, today);
+  if (diff <= 0) return `입사 ${Math.abs(diff) + 1}일차`;
+  return `입사 ${formatDday(diff)}`;
+}
+
 export function formatSeoulDateLabel(dateStr: string): string {
   const [, m, d] = dateStr.split("-").map(Number);
   return `${m}월 ${d}일`;

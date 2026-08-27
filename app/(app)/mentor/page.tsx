@@ -3,7 +3,7 @@ import { getSeoulToday } from "@/lib/dday";
 import { fetchPlanTasksByEmployee, summarizeTasks } from "@/lib/plan-progress";
 import { MemberRow } from "@/components/member-row";
 import { PendingTaskCard } from "@/components/pending-task-card";
-import { MyTaskCard } from "@/components/my-task-card";
+import { MyWorkSection } from "@/components/my-work-section";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export default async function MentorPage() {
 
   const { data: mentees } = await supabase
     .from("profiles")
-    .select("id, full_name, team_id")
+    .select("id, full_name, team_id, hire_date")
     .eq("mentor_id", user.id)
     .order("full_name", { ascending: true });
 
@@ -47,14 +47,9 @@ export default async function MentorPage() {
     await fetchPlanTasksByEmployee(supabase, menteeIds);
 
   const nameById = new Map(menteeList.map((m) => [m.id, m.full_name]));
+  const hireDateById = new Map(menteeList.map((m) => [m.id, m.hire_date]));
   const pendingTasks = allTasks
     .filter((t) => t.status === "pending")
-    .map((task) => ({
-      task,
-      menteeName: nameById.get(employeeIdByPlan.get(task.plan_id) ?? "") ?? "",
-    }));
-  const myTasks = allTasks
-    .filter((t) => t.assignee_id === user.id && (t.status === "todo" || t.status === "rejected"))
     .map((task) => ({
       task,
       menteeName: nameById.get(employeeIdByPlan.get(task.plan_id) ?? "") ?? "",
@@ -62,31 +57,15 @@ export default async function MentorPage() {
 
   return (
     <div className="mx-auto max-w-[880px] px-4 py-8 md:px-8">
-      <section className="mb-10">
-        <h2
-          className="mb-3"
-          style={{
-            fontSize: 15,
-            lineHeight: "20px",
-            fontWeight: 600,
-            letterSpacing: "-0.01em",
-            color: "var(--text)",
-          }}
-        >
-          내가 처리할 항목
-        </h2>
-        {myTasks.length === 0 ? (
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
-            내가 처리할 항목이 없습니다.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {myTasks.map(({ task, menteeName }) => (
-              <MyTaskCard key={task.id} task={task} today={today} menteeName={menteeName} />
-            ))}
-          </div>
-        )}
-      </section>
+      <MyWorkSection
+        allTasks={allTasks}
+        nameById={nameById}
+        employeeIdByPlan={employeeIdByPlan}
+        planIdByEmployee={planIdByEmployee}
+        hireDateById={hireDateById}
+        currentUserId={user.id}
+        today={today}
+      />
 
       <section className="mb-10">
         <h2

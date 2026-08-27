@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSeoulToday } from "@/lib/dday";
 import { fetchPlanTasksByEmployee, summarizeTasks } from "@/lib/plan-progress";
 import { MemberRow } from "@/components/member-row";
-import { MyTaskCard } from "@/components/my-task-card";
+import { MyWorkSection } from "@/components/my-work-section";
 
 export const dynamic = "force-dynamic";
 
@@ -25,14 +25,14 @@ export default async function TeamPage() {
   const teamId = myProfile?.team_id;
 
   let teamName = "";
-  let members: { id: string; full_name: string }[] = [];
+  let members: { id: string; full_name: string; hire_date: string | null }[] = [];
 
   if (teamId) {
     const [{ data: team }, { data: newbies }] = await Promise.all([
       supabase.from("teams").select("name").eq("id", teamId).maybeSingle(),
       supabase
         .from("profiles")
-        .select("id, full_name")
+        .select("id, full_name, hire_date")
         .eq("team_id", teamId)
         .eq("role", "newbie")
         .order("full_name", { ascending: true }),
@@ -46,12 +46,7 @@ export default async function TeamPage() {
     await fetchPlanTasksByEmployee(supabase, memberIds);
 
   const nameById = new Map(members.map((m) => [m.id, m.full_name]));
-  const myTasks = allTasks
-    .filter((t) => t.assignee_id === user.id && (t.status === "todo" || t.status === "rejected"))
-    .map((task) => ({
-      task,
-      menteeName: nameById.get(employeeIdByPlan.get(task.plan_id) ?? "") ?? "",
-    }));
+  const hireDateById = new Map(members.map((m) => [m.id, m.hire_date]));
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-8">
@@ -68,31 +63,15 @@ export default async function TeamPage() {
         팀 진행 현황
       </h1>
 
-      <section className="mb-10">
-        <h2
-          className="mb-3"
-          style={{
-            fontSize: 15,
-            lineHeight: "20px",
-            fontWeight: 600,
-            letterSpacing: "-0.01em",
-            color: "var(--text)",
-          }}
-        >
-          내가 처리할 항목
-        </h2>
-        {myTasks.length === 0 ? (
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
-            내가 처리할 항목이 없습니다.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {myTasks.map(({ task, menteeName }) => (
-              <MyTaskCard key={task.id} task={task} today={today} menteeName={menteeName} />
-            ))}
-          </div>
-        )}
-      </section>
+      <MyWorkSection
+        allTasks={allTasks}
+        nameById={nameById}
+        employeeIdByPlan={employeeIdByPlan}
+        planIdByEmployee={planIdByEmployee}
+        hireDateById={hireDateById}
+        currentUserId={user.id}
+        today={today}
+      />
 
       {members.length === 0 ? (
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
