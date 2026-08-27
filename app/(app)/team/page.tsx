@@ -3,6 +3,7 @@ import { getSeoulToday } from "@/lib/dday";
 import { fetchPlanTasksByEmployee, summarizeTasks } from "@/lib/plan-progress";
 import { MemberRow } from "@/components/member-row";
 import { MyWorkSection } from "@/components/my-work-section";
+import { TeamPendingSection } from "@/components/team-pending-section";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,15 @@ export default async function TeamPage() {
         planIdByEmployee={planIdByEmployee}
         hireDateById={hireDateById}
         currentUserId={user.id}
+        today={today}
+      />
+
+      <TeamPendingSection
+        allTasks={allTasks}
+        nameById={nameById}
+        employeeIdByPlan={employeeIdByPlan}
+        planIdByEmployee={planIdByEmployee}
+        hireDateById={hireDateById}
         today={today}
       />
 

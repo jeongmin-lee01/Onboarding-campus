@@ -51,6 +51,7 @@ export async function approveTask(taskId: string) {
   }
 
   revalidatePath("/mentor");
+  revalidatePath("/team");
   revalidatePath("/admin");
   return { error: null };
 }
@@ -81,6 +82,7 @@ export async function rejectTask(taskId: string, reason: string) {
   }
 
   revalidatePath("/mentor");
+  revalidatePath("/team");
   revalidatePath("/admin");
   return { error: null };
 }

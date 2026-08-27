@@ -10,4 +10,5 @@ export type PlanTask = {
   sort_order: number;
   status: string;
   reject_reason: string | null;
+  completed_at: string | null;
 };

@@ -35,7 +35,7 @@ export async function fetchPlanTasksByEmployee(
     ? await supabase
         .from("plan_tasks")
         .select(
-          "id, plan_id, title, description, owner_role, assignee_id, due_date, phase, is_required, sort_order, status, reject_reason"
+          "id, plan_id, title, description, owner_role, assignee_id, due_date, phase, is_required, sort_order, status, reject_reason, completed_at"
         )
         .in("plan_id", planIds)
         .order("due_date", { ascending: true })

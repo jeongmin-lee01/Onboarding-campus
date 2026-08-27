@@ -56,7 +56,7 @@ export default async function PlanDetailPage({
   const { data } = await supabase
     .from("plan_tasks")
     .select(
-      "id, title, description, owner_role, assignee_id, due_date, phase, is_required, sort_order, status, reject_reason"
+      "id, title, description, owner_role, assignee_id, due_date, phase, is_required, sort_order, status, reject_reason, completed_at"
     )
     .eq("plan_id", plan.id)
     .order("due_date", { ascending: true });
