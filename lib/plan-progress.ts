@@ -54,8 +54,8 @@ export async function fetchPlanTasksByEmployee(
   return { planIdByEmployee, employeeIdByPlan, tasksByEmployee, allTasks };
 }
 
-/** 한 사람의 태스크 목록에서 진행률/지연 건수/가장 급한 태스크를 계산한다. */
-export function summarizeTasks(tasks: TaskWithPlan[], today: string) {
+/** 한 사람의 태스크 목록에서 진행률/지연 건수/가장 급한 태스크를 계산한다. plan_id 없이도 쓸 수 있게 PlanTask 기준으로 받는다. */
+export function summarizeTasks(tasks: PlanTask[], today: string) {
   const total = tasks.length;
   const done = tasks.filter((t) => t.status === "done").length;
   const nonDone = tasks.filter((t) => t.status !== "done");

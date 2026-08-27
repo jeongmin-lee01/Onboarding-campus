@@ -77,6 +77,7 @@ export default async function MyPage({
         initialToday={getSeoulToday()}
         initialFilter={initialFilter}
         viewerRole="newbie"
+        filterByViewerRole={false}
       />
     </div>
   );

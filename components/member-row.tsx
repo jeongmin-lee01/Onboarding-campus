@@ -42,7 +42,11 @@ export function MemberRow({
         {teamLabel}
       </span>
       <ProgressBar done={done} total={total} className="flex-1" />
-      <span className="mono w-14 shrink-0 text-right" style={{ fontSize: 13, color: "var(--text-muted)" }}>
+      <span
+        className="mono w-14 shrink-0 text-right"
+        style={{ fontSize: 13, color: "var(--text-muted)" }}
+        title={`전체 ${total}개 중 ${done}개 완료`}
+      >
         {done}/{total}
       </span>
       {overdueCount > 0 && (

@@ -16,6 +16,7 @@ import { TaskCard } from "@/components/task-card";
 import { CompleteRequestButton } from "@/components/complete-request-button";
 import { RevertButton } from "@/components/revert-button";
 import { canViewTask } from "@/lib/roles";
+import { summarizeTasks } from "@/lib/plan-progress";
 import type { PlanTask } from "@/lib/types";
 
 export type TaskFilter = "all" | "active" | "done";
@@ -265,6 +266,7 @@ export function Checklist({
   allowRevert = false,
   initialFilter = "all",
   viewerRole,
+  filterByViewerRole = true,
 }: {
   tasks: PlanTask[];
   currentUserId: string;
@@ -279,6 +281,8 @@ export function Checklist({
   initialFilter?: TaskFilter;
   /** 로그인한 사용자의 role. owner_role 등급에 따라 어떤 태스크를 보여줄지 결정한다. */
   viewerRole: string;
+  /** false면 owner_role 등급 필터를 건너뛰고 플랜 전체 태스크를 보여준다(진행률 분모와 화면 노출을 일치시키기 위함). 기본 true. */
+  filterByViewerRole?: boolean;
 }) {
   const [today, setToday] = useState(initialToday);
   const [filter, setFilter] = useState<TaskFilter>(initialFilter);
@@ -356,9 +360,8 @@ export function Checklist({
     return () => clearTimeout(timer);
   }, [highlightedTaskId]);
 
-  // 진행률 막대는 플랜 전체 기준(등급 필터 미적용)으로 유지한다 — 다른 대시보드와 기준을 맞추기 위함.
-  const total = tasks.length;
-  const doneCount = tasks.filter((t) => t.status === "done").length;
+  // 진행률 막대는 플랜 전체 기준(등급 필터 미적용)으로 유지한다 — /mentor·/team·/admin의 summarizeTasks와 같은 함수를 써서 숫자를 맞춘다.
+  const { total, done: doneCount } = summarizeTasks(tasks, today);
 
   if (total === 0) {
     return (
@@ -370,8 +373,11 @@ export function Checklist({
     );
   }
 
-  // 그 외(액션 큐, 타임라인)는 뷰어 등급에서 볼 수 있는 태스크만 대상으로 한다.
-  const visibleTasks = tasks.filter((t) => canViewTask(viewerRole, t.owner_role));
+  // 그 외(액션 큐, 타임라인)도 진행률과 같은 집합을 쓴다. filterByViewerRole이 true일 때만
+  // (예: /plan/[id]의 제3자 조회) 뷰어 등급에서 볼 수 있는 태스크로 좁힌다.
+  const visibleTasks = filterByViewerRole
+    ? tasks.filter((t) => canViewTask(viewerRole, t.owner_role))
+    : tasks;
   const todayCount = visibleTasks.filter(
     (t) => t.status !== "done" && diffDays(t.due_date, today) === 0
   ).length;
@@ -432,6 +438,11 @@ export function Checklist({
             </span>
           )}
         </div>
+        {!filterByViewerRole && (
+          <p className="mt-1" style={{ fontSize: 13, color: "var(--text-faint)" }}>
+            전체 {total}개 중 {doneCount}개 완료 (내 담당 외 항목 포함)
+          </p>
+        )}
       </div>
 
       {!readOnly && <FilterChips value={filter} onChange={handleFilterChange} />}
