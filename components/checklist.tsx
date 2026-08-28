@@ -393,7 +393,7 @@ export function Checklist({
   // 같은 effect에 타이머를 두면 정리(cleanup)가 타이머를 바로 취소해 버린다.
   useEffect(() => {
     if (!highlightedTaskId) return;
-    const timer = setTimeout(() => setHighlightedTaskId(null), 1500);
+    const timer = setTimeout(() => setHighlightedTaskId(null), 1600);
     return () => clearTimeout(timer);
   }, [highlightedTaskId]);
 
