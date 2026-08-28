@@ -86,6 +86,8 @@
   /* 서체 (design.md 4.1, CDN으로 로드) */
   --font-sans: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  /* design.md 4.1/10장 예외: 로그인 화면 워드마크 전용 (사용자 승인) */
+  --font-serif: 'Lora', Georgia, serif;
 
   /* ---- shadcn/ui 기본 토큰을 위 팔레트로 덮어쓴다 ---- */
   --background: var(--bg);

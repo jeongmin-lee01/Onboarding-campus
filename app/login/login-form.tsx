@@ -63,14 +63,15 @@ export function LoginForm() {
       <h1
         className="text-center"
         style={{
-          fontSize: 24,
-          lineHeight: "32px",
+          fontFamily: "var(--font-serif)",
+          fontSize: 22,
+          lineHeight: "30px",
           fontWeight: 600,
-          letterSpacing: "-0.02em",
+          letterSpacing: 0,
           color: "var(--text)",
         }}
       >
-        온보딩
+        Onboarding Campus
       </h1>
 
       <form action={loginAction} className="mt-6 flex flex-col gap-3">
