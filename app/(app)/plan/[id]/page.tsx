@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSeoulToday } from "@/lib/dday";
 import { ROLE_LABEL } from "@/lib/roles";
 import { Checklist } from "@/components/checklist";
+import { AddTaskButton } from "@/components/add-task-button";
 import type { PlanTask } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,8 @@ export default async function PlanDetailPage({
     .eq("id", user.id)
     .maybeSingle();
   const allowRevert = viewer?.role === "hr";
+  const canManageTasks =
+    viewer?.role === "mentor" || viewer?.role === "leader" || viewer?.role === "hr";
 
   const { data: plan } = await supabase
     .from("plans")
@@ -87,23 +90,26 @@ export default async function PlanDetailPage({
 
   return (
     <div className="mx-auto max-w-[880px] px-4 py-8 md:px-8">
-      <div className="mb-6">
-        <h1
-          style={{
-            fontSize: 24,
-            lineHeight: "32px",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            color: "var(--text)",
-          }}
-        >
-          {employee.full_name}
-        </h1>
-        {teamName && (
-          <p className="mt-1" style={{ fontSize: 14, color: "var(--text-muted)" }}>
-            {teamName}
-          </p>
-        )}
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1
+            style={{
+              fontSize: 24,
+              lineHeight: "32px",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              color: "var(--text)",
+            }}
+          >
+            {employee.full_name}
+          </h1>
+          {teamName && (
+            <p className="mt-1" style={{ fontSize: 14, color: "var(--text-muted)" }}>
+              {teamName}
+            </p>
+          )}
+        </div>
+        {canManageTasks && <AddTaskButton planId={plan.id} />}
       </div>
       <Checklist
         tasks={tasks}
@@ -112,6 +118,7 @@ export default async function PlanDetailPage({
         initialToday={getSeoulToday()}
         readOnly
         allowRevert={allowRevert}
+        allowEditDueDate={canManageTasks}
         viewerRole={viewer?.role ?? ""}
       />
     </div>

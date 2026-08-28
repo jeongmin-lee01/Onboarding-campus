@@ -76,6 +76,15 @@ export function formatSeoulDateLabel(dateStr: string): string {
 export const PHASE_ORDER = ["pre", "day1", "week1", "month1", "month3"] as const;
 export type Phase = (typeof PHASE_ORDER)[number];
 
+/** 마감일이 플랜 시작일(입사일) 기준 며칠째인지로 phase를 정한다. 수동 태스크 추가·마감일 수정에서 쓴다. */
+export function phaseFromOffset(offsetDays: number): Phase {
+  if (offsetDays < 0) return "pre";
+  if (offsetDays === 0) return "day1";
+  if (offsetDays <= 7) return "week1";
+  if (offsetDays <= 30) return "month1";
+  return "month3";
+}
+
 export const PHASE_LABEL: Record<Phase, string> = {
   pre: "입사 전",
   day1: "입사 당일",

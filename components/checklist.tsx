@@ -15,6 +15,7 @@ import {
 import { TaskCard } from "@/components/task-card";
 import { CompleteRequestButton } from "@/components/complete-request-button";
 import { RevertButton } from "@/components/revert-button";
+import { EditDueDateButton } from "@/components/edit-due-date-button";
 import { canViewTask } from "@/lib/roles";
 import { summarizeTasks } from "@/lib/plan-progress";
 import type { PlanTask } from "@/lib/types";
@@ -264,6 +265,7 @@ export function Checklist({
   initialToday,
   readOnly = false,
   allowRevert = false,
+  allowEditDueDate = false,
   initialFilter = "all",
   viewerRole,
   filterByViewerRole = true,
@@ -277,6 +279,8 @@ export function Checklist({
   readOnly?: boolean;
   /** true면 완료(done) 카드에 되돌리기 버튼을 보여준다 (인사담당자 전용). */
   allowRevert?: boolean;
+  /** true면 미완료 카드에 마감일 수정 버튼을 보여준다 (사수/팀장/인사 전용, /plan/[id]에서만 켠다). */
+  allowEditDueDate?: boolean;
   /** 필터 칩 초기값. URL 쿼리(?filter=)에서 서버가 읽어 전달한다. readOnly일 때는 사용하지 않는다. */
   initialFilter?: TaskFilter;
   /** 로그인한 사용자의 role. owner_role 등급에 따라 어떤 태스크를 보여줄지 결정한다. */
@@ -492,11 +496,19 @@ export function Checklist({
             const isMine = !readOnly && task.assignee_id === currentUserId;
             const canRequest = isMine && (task.status === "todo" || task.status === "rejected");
             const canRevert = allowRevert && task.status === "done";
-            const action = canRequest ? (
-              <CompleteRequestButton taskId={task.id} />
-            ) : canRevert ? (
-              <RevertButton taskId={task.id} />
-            ) : undefined;
+            const canEditDueDate = allowEditDueDate && task.status !== "done";
+            const actionNodes: React.ReactNode[] = [];
+            if (canRequest) actionNodes.push(<CompleteRequestButton key="request" taskId={task.id} />);
+            if (canRevert) actionNodes.push(<RevertButton key="revert" taskId={task.id} />);
+            if (canEditDueDate) {
+              actionNodes.push(
+                <EditDueDateButton key="edit" taskId={task.id} dueDate={task.due_date} />
+              );
+            }
+            const action =
+              actionNodes.length > 0 ? (
+                <div className="flex items-center gap-2">{actionNodes}</div>
+              ) : undefined;
             const highlighted = highlightedTaskId === task.id;
             return (
               <div
