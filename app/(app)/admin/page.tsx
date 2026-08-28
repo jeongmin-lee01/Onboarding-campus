@@ -124,34 +124,49 @@ export default async function AdminPage() {
         )}
       </section>
 
-      <div className="mb-8 flex items-center gap-3">
-        <ProgressBar done={overallDone} total={overallTotal} className="flex-1" />
-        <span className="mono shrink-0" style={{ fontSize: 13, color: "var(--text-muted)" }}>
-          전사 {overallDone}/{overallTotal}
-        </span>
-      </div>
+      <section>
+        <h2
+          className="mb-1"
+          style={{
+            fontSize: 15,
+            lineHeight: "20px",
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+            color: "var(--text)",
+          }}
+        >
+          전사 현황
+        </h2>
 
-      <div className="overflow-x-auto">
-        {members.map((m) => {
-          const tasks = tasksByEmployee.get(m.id) ?? [];
-          const { total, done, overdueCount, worstTask } = summarizeTasks(tasks, today);
-          const planId = planIdByEmployee.get(m.id);
-          if (!planId) return null;
-          return (
-            <MemberRow
-              key={m.id}
-              name={m.full_name}
-              teamLabel={m.team_id ? (teamNameById.get(m.team_id) ?? "") : ""}
-              planId={planId}
-              done={done}
-              total={total}
-              overdueCount={overdueCount}
-              worstTask={worstTask}
-              today={today}
-            />
-          );
-        })}
-      </div>
+        <div className="mb-8 flex items-center gap-3">
+          <ProgressBar done={overallDone} total={overallTotal} className="flex-1" />
+          <span className="mono shrink-0" style={{ fontSize: 13, color: "var(--text-muted)" }}>
+            전사 {overallDone}/{overallTotal}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          {members.map((m) => {
+            const tasks = tasksByEmployee.get(m.id) ?? [];
+            const { total, done, overdueCount, worstTask } = summarizeTasks(tasks, today);
+            const planId = planIdByEmployee.get(m.id);
+            if (!planId) return null;
+            return (
+              <MemberRow
+                key={m.id}
+                name={m.full_name}
+                teamLabel={m.team_id ? (teamNameById.get(m.team_id) ?? "") : ""}
+                planId={planId}
+                done={done}
+                total={total}
+                overdueCount={overdueCount}
+                worstTask={worstTask}
+                today={today}
+              />
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

@@ -64,16 +64,6 @@ export default async function TeamPage() {
         팀 진행 현황
       </h1>
 
-      <MyWorkSection
-        allTasks={allTasks}
-        nameById={nameById}
-        employeeIdByPlan={employeeIdByPlan}
-        planIdByEmployee={planIdByEmployee}
-        hireDateById={hireDateById}
-        currentUserId={user.id}
-        today={today}
-      />
-
       <TeamPendingSection
         allTasks={allTasks}
         nameById={nameById}
@@ -83,33 +73,57 @@ export default async function TeamPage() {
         today={today}
       />
 
-      {members.length === 0 ? (
-        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
-          등록된 신입사원이 없습니다.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          {members.map((m) => {
-            const tasks = tasksByEmployee.get(m.id) ?? [];
-            const { total, done, overdueCount, worstTask } = summarizeTasks(tasks, today);
-            const planId = planIdByEmployee.get(m.id);
-            if (!planId) return null;
-            return (
-              <MemberRow
-                key={m.id}
-                name={m.full_name}
-                teamLabel={teamName}
-                planId={planId}
-                done={done}
-                total={total}
-                overdueCount={overdueCount}
-                worstTask={worstTask}
-                today={today}
-              />
-            );
-          })}
-        </div>
-      )}
+      <section className="mb-10">
+        <h2
+          className="mb-1"
+          style={{
+            fontSize: 15,
+            lineHeight: "20px",
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+            color: "var(--text)",
+          }}
+        >
+          팀 현황
+        </h2>
+        {members.length === 0 ? (
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            등록된 신입사원이 없습니다.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            {members.map((m) => {
+              const tasks = tasksByEmployee.get(m.id) ?? [];
+              const { total, done, overdueCount, worstTask } = summarizeTasks(tasks, today);
+              const planId = planIdByEmployee.get(m.id);
+              if (!planId) return null;
+              return (
+                <MemberRow
+                  key={m.id}
+                  name={m.full_name}
+                  teamLabel={teamName}
+                  planId={planId}
+                  done={done}
+                  total={total}
+                  overdueCount={overdueCount}
+                  worstTask={worstTask}
+                  today={today}
+                />
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <MyWorkSection
+        allTasks={allTasks}
+        nameById={nameById}
+        employeeIdByPlan={employeeIdByPlan}
+        planIdByEmployee={planIdByEmployee}
+        hireDateById={hireDateById}
+        currentUserId={user.id}
+        today={today}
+      />
     </div>
   );
 }
