@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSeoulToday } from "@/lib/dday";
 import { fetchPlanTasksByEmployee, summarizeTasks } from "@/lib/plan-progress";
@@ -5,6 +6,7 @@ import { MemberRow } from "@/components/member-row";
 import { ProgressBar } from "@/components/progress-bar";
 import { PendingTaskCard } from "@/components/pending-task-card";
 import { MyWorkSection } from "@/components/my-work-section";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -29,18 +31,20 @@ export default async function AdminPage() {
   if (members.length === 0) {
     return (
       <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-8">
-        <h1
-          className="mb-6"
-          style={{
-            fontSize: 24,
-            lineHeight: "32px",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            color: "var(--text)",
-          }}
-        >
-          전사 대시보드
-        </h1>
+        <div className="mb-6 flex items-center justify-between">
+          <h1
+            style={{
+              fontSize: 24,
+              lineHeight: "32px",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              color: "var(--text)",
+            }}
+          >
+            전사 대시보드
+          </h1>
+          <Button render={<Link href="/admin/new" />}>신입 등록</Button>
+        </div>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
           등록된 신입사원이 없습니다. 신입 등록에서 추가할 수 있습니다.
         </p>
@@ -74,17 +78,20 @@ export default async function AdminPage() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-8">
-      <h1
-        style={{
-          fontSize: 24,
-          lineHeight: "32px",
-          fontWeight: 600,
-          letterSpacing: "-0.02em",
-          color: "var(--text)",
-        }}
-      >
-        전사 대시보드
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1
+          style={{
+            fontSize: 24,
+            lineHeight: "32px",
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            color: "var(--text)",
+          }}
+        >
+          전사 대시보드
+        </h1>
+        <Button render={<Link href="/admin/new" />}>신입 등록</Button>
+      </div>
 
       <div className="mt-6">
         <MyWorkSection

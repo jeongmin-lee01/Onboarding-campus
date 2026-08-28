@@ -28,6 +28,16 @@ export function diffDays(dueDate: string, today: string): number {
   return Math.round((due.getTime() - base.getTime()) / 86_400_000);
 }
 
+/** 'YYYY-MM-DD' 문자열에 offsetDays를 더한 날짜 문자열을 반환한다. PRD 6.8: due_date = start_date + offset_days. */
+export function addOffsetDays(dateStr: string, offsetDays: number): string {
+  const date = new Date(`${dateStr}T00:00:00`);
+  date.setDate(date.getDate() + offsetDays);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export function formatDday(diff: number): string {
   if (diff > 0) return `D-${diff}`;
   if (diff === 0) return "D-Day";
