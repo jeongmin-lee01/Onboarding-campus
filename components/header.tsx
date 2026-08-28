@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/lib/supabase/actions";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/role-badge";
+import { DateTravelToggle } from "@/components/date-travel-toggle";
 
 export async function Header() {
   const supabase = await createClient();
@@ -28,8 +29,9 @@ export async function Header() {
       className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b px-4 md:px-8"
       style={{ background: "var(--bg-subtle)", borderColor: "var(--border)" }}
     >
-      <div className="flex items-center gap-6">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-6">
         <span
+          className="shrink-0"
           style={{
             fontSize: 15,
             fontWeight: 600,
@@ -39,18 +41,19 @@ export async function Header() {
         >
           온보딩
         </span>
+        {user && <DateTravelToggle />}
         {role === "hr" && (
-          <nav className="flex items-center gap-4">
+          <nav className="flex min-w-0 items-center gap-2 sm:gap-4">
             <Link
               href="/admin"
-              className="transition-colors duration-150 hover:text-[var(--text)]"
+              className="truncate transition-colors duration-150 hover:text-[var(--text)]"
               style={{ fontSize: 14, color: "var(--text-muted)" }}
             >
               전사 대시보드
             </Link>
             <Link
               href="/admin/members"
-              className="transition-colors duration-150 hover:text-[var(--text)]"
+              className="truncate transition-colors duration-150 hover:text-[var(--text)]"
               style={{ fontSize: 14, color: "var(--text-muted)" }}
             >
               구성원 목록
@@ -59,9 +62,9 @@ export async function Header() {
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {name && (
-          <span className="flex items-center gap-2">
+          <span className="hidden items-center gap-2 min-[420px]:flex">
             <span style={{ fontSize: 14, color: "var(--text)" }}>{name}</span>
             <RoleBadge role={role} />
           </span>

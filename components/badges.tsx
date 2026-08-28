@@ -1,4 +1,7 @@
+"use client";
+
 import {
+  addOffsetDays,
   diffDays,
   formatDday,
   getDdayTone,
@@ -6,6 +9,7 @@ import {
   STATUS_TONE_COLOR,
   STATUS_LABEL,
 } from "@/lib/dday";
+import { useDateTravel } from "@/lib/date-travel-context";
 
 export function DdayBadge({
   dueDate,
@@ -14,9 +18,12 @@ export function DdayBadge({
 }: {
   dueDate: string;
   status: string;
+  /** 서버가 계산한 실제 오늘. 날짜 여행 오프셋은 이 컴포넌트 안에서 더한다. */
   today: string;
 }) {
-  const diff = diffDays(dueDate, today);
+  const { offsetDays } = useDateTravel();
+  const displayToday = offsetDays === 0 ? today : addOffsetDays(today, offsetDays);
+  const diff = diffDays(dueDate, displayToday);
   const tone = getDdayTone(diff, status);
   const { fg, bg } = TONE_COLOR[tone];
   const label = formatDday(diff);

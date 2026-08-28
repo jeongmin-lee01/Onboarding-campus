@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  addOffsetDays,
   diffDays,
   formatDday,
   formatSeoulDateLabel,
@@ -18,7 +19,11 @@ import { RevertButton } from "@/components/revert-button";
 import { EditDueDateButton } from "@/components/edit-due-date-button";
 import { canViewTask } from "@/lib/roles";
 import { summarizeTasks } from "@/lib/plan-progress";
+import { useDateTravel } from "@/lib/date-travel-context";
 import type { PlanTask } from "@/lib/types";
+
+const focusRing =
+  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
 
 export type TaskFilter = "all" | "active" | "done";
 
@@ -163,7 +168,7 @@ function CollapseToggleRow({
         <button
           type="button"
           onClick={onToggle}
-          className="transition-colors duration-150 hover:text-[var(--text)]"
+          className={`rounded-md transition-colors duration-150 hover:text-[var(--text)] ${focusRing}`}
           style={{ fontSize: 13, color: "var(--text-muted)" }}
         >
           {expanded ? "이전 완료 항목 접기" : `이전 완료 항목 ${count}개 보기`}
@@ -189,7 +194,7 @@ function FilterChips({
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className="transition-colors duration-150"
+            className={`transition-colors duration-150 ${focusRing}`}
             style={{
               fontSize: 13,
               fontWeight: 500,
@@ -240,7 +245,7 @@ function ActionQueue({
               <button
                 type="button"
                 onClick={() => onJump(task.id)}
-                className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left transition-colors duration-150 hover:bg-[var(--bg-sunken)]"
+                className={`flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left transition-colors duration-150 hover:bg-[var(--bg-sunken)] ${focusRing}`}
               >
                 <span style={{ fontSize: 13, color: "var(--text)" }}>{task.title}</span>
                 <span
@@ -295,10 +300,13 @@ export function Checklist({
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { offsetDays } = useDateTravel();
+  const displayToday = offsetDays === 0 ? today : addOffsetDays(today, offsetDays);
 
   const todayRef = useRef<HTMLDivElement | null>(null);
   const taskRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const hasAutoScrolled = useRef(false);
+  const prevTodayTopRef = useRef<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -306,6 +314,31 @@ export function Checklist({
     }, msUntilNextSeoulMidnight());
     return () => clearTimeout(timer);
   }, [today]);
+
+  // design.md 7장: 날짜 여행 토글로 오늘 선이 움직이면 250ms ease로 미끄러지듯 이동한다.
+  // (FLIP 기법: 이동 전 위치를 기억해뒀다가, DOM이 새 위치로 반영된 직후 그 차이만큼
+  // 즉시 되돌려놓고 다음 프레임에 0으로 트랜지션한다.) prefers-reduced-motion은
+  // globals.css의 전역 규칙이 transition-duration을 0으로 만들어 자동으로 처리된다.
+  useLayoutEffect(() => {
+    const el = todayRef.current;
+    if (!el) {
+      prevTodayTopRef.current = null;
+      return;
+    }
+    const newTop = el.getBoundingClientRect().top;
+    const prevTop = prevTodayTopRef.current;
+    if (prevTop !== null && prevTop !== newTop) {
+      const delta = prevTop - newTop;
+      el.style.transition = "none";
+      el.style.transform = `translateY(${delta}px)`;
+      el.getBoundingClientRect(); // 강제 리플로우 — 위 스타일을 확정시킨 뒤에 아래에서 트랜지션을 건다.
+      requestAnimationFrame(() => {
+        el.style.transition = "transform 250ms ease";
+        el.style.transform = "translateY(0)";
+      });
+    }
+    prevTodayTopRef.current = newTop;
+  }, [displayToday]);
 
   // 진입 시 1회만: 오늘 선을 화면 상단 1/3 지점으로 스크롤한다.
   useEffect(() => {
@@ -365,7 +398,7 @@ export function Checklist({
   }, [highlightedTaskId]);
 
   // 진행률 막대는 플랜 전체 기준(등급 필터 미적용)으로 유지한다 — /mentor·/team·/admin의 summarizeTasks와 같은 함수를 써서 숫자를 맞춘다.
-  const { total, done: doneCount } = summarizeTasks(tasks, today);
+  const { total, done: doneCount } = summarizeTasks(tasks, displayToday);
 
   if (total === 0) {
     return (
@@ -383,10 +416,10 @@ export function Checklist({
     ? tasks.filter((t) => canViewTask(viewerRole, t.owner_role))
     : tasks;
   const todayCount = visibleTasks.filter(
-    (t) => t.status !== "done" && diffDays(t.due_date, today) === 0
+    (t) => t.status !== "done" && diffDays(t.due_date, displayToday) === 0
   ).length;
   const overdueTasks = visibleTasks.filter(
-    (t) => t.status !== "done" && diffDays(t.due_date, today) < 0
+    (t) => t.status !== "done" && diffDays(t.due_date, displayToday) < 0
   );
   const overdueCount = overdueTasks.length;
 
@@ -397,10 +430,10 @@ export function Checklist({
   for (const task of filteredTasks) {
     (tasksByPhase[task.phase] ??= []).push(task);
   }
-  const baseRows = buildRows(tasksByPhase, today);
+  const baseRows = buildRows(tasksByPhase, displayToday);
   const rows = readOnly
     ? baseRows
-    : dropEmptyPhaseHeaders(applyPastDoneCollapse(baseRows, today, showPastDone));
+    : dropEmptyPhaseHeaders(applyPastDoneCollapse(baseRows, displayToday, showPastDone));
 
   return (
     <div>
@@ -408,7 +441,7 @@ export function Checklist({
         <ActionQueue
           overdueTasks={overdueTasks}
           todayCount={todayCount}
-          today={today}
+          today={displayToday}
           onJump={handleJumpToTask}
         />
       )}
@@ -461,7 +494,13 @@ export function Checklist({
         <div className="flex flex-col">
           {rows.map((row, i) => {
             if (row.type === "today") {
-              return <TodayDivider key={`today-${i}`} today={today} innerRef={(el) => (todayRef.current = el)} />;
+              return (
+                <TodayDivider
+                  key="today-divider"
+                  today={displayToday}
+                  innerRef={(el) => (todayRef.current = el)}
+                />
+              );
             }
             if (row.type === "collapse-toggle") {
               return (

@@ -43,7 +43,7 @@ export default async function AdminPage() {
           >
             전사 대시보드
           </h1>
-          <Button render={<Link href="/admin/new" />}>신입 등록</Button>
+          <Button nativeButton={false} render={<Link href="/admin/new" />}>신입 등록</Button>
         </div>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
           등록된 신입사원이 없습니다. 신입 등록에서 추가할 수 있습니다.
@@ -90,7 +90,7 @@ export default async function AdminPage() {
         >
           전사 대시보드
         </h1>
-        <Button render={<Link href="/admin/new" />}>신입 등록</Button>
+        <Button nativeButton={false} render={<Link href="/admin/new" />}>신입 등록</Button>
       </div>
 
       <div className="mt-6">
