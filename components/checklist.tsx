@@ -556,12 +556,7 @@ export function Checklist({
                   if (el) taskRefs.current.set(task.id, el);
                   else taskRefs.current.delete(task.id);
                 }}
-                className={`flex gap-3 pb-3 ${highlighted ? "highlight-flash" : ""}`}
-                style={{
-                  borderRadius: "var(--r-lg)",
-                  outline: "2px solid transparent",
-                  outlineOffset: 2,
-                }}
+                className="flex gap-3 pb-3"
               >
                 <RailGutter node={task.status === "done" ? "done" : "pending"} />
                 <div className="flex-1">
@@ -571,6 +566,7 @@ export function Checklist({
                     isMine={isMine}
                     assigneeLabel={assigneeLabels[task.id] ?? null}
                     action={action}
+                    highlighted={highlighted}
                   />
                 </div>
               </div>

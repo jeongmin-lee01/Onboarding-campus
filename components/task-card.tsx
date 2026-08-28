@@ -7,6 +7,7 @@ export function TaskCard({
   isMine,
   assigneeLabel,
   action,
+  highlighted = false,
 }: {
   task: PlanTask;
   today: string;
@@ -15,17 +16,21 @@ export function TaskCard({
   assigneeLabel: string | null;
   /** 메타 우측 액션 슬롯. 없으면 아무것도 렌더링하지 않는다. */
   action?: React.ReactNode;
+  /** true면 지연 목록에서 점프해 온 직후라 카드 테두리가 파랗게 반짝인다. */
+  highlighted?: boolean;
 }) {
   const isDone = task.status === "done";
   const isRejected = task.status === "rejected";
 
   return (
     <div
-      className="rounded-lg border p-4 transition-colors duration-150 hover:bg-[var(--bg-subtle)]"
+      className={`rounded-lg border p-4 transition-colors duration-150 hover:bg-[var(--bg-subtle)] ${highlighted ? "highlight-flash" : ""}`}
       style={{
         background: isMine ? "var(--bg)" : "var(--bg-subtle)",
         borderColor: "var(--border)",
         borderLeft: isRejected ? "3px solid var(--st-overdue)" : undefined,
+        outline: "2px solid transparent",
+        outlineOffset: 2,
       }}
     >
       <div className="flex items-start justify-between gap-3">
