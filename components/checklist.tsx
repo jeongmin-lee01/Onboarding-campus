@@ -556,10 +556,10 @@ export function Checklist({
                   if (el) taskRefs.current.set(task.id, el);
                   else taskRefs.current.delete(task.id);
                 }}
-                className="flex gap-3 pb-3 transition-[outline-color] duration-200"
+                className={`flex gap-3 pb-3 ${highlighted ? "highlight-flash" : ""}`}
                 style={{
                   borderRadius: "var(--r-lg)",
-                  outline: highlighted ? "2px solid var(--accent)" : "2px solid transparent",
+                  outline: "2px solid transparent",
                   outlineOffset: 2,
                 }}
               >

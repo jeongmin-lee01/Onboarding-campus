@@ -146,3 +146,14 @@
     animation-duration: 0s !important;
   }
 }
+
+/* 지연 항목에서 태스크로 점프했을 때 카드 테두리가 파랗게(--st-pending) 반짝인다. */
+@keyframes highlight-flash {
+  0%, 100% { outline-color: transparent; }
+  15%, 45%, 75% { outline-color: var(--st-pending); }
+  30%, 60%, 90% { outline-color: transparent; }
+}
+
+.highlight-flash {
+  animation: highlight-flash 1.2s ease-in-out;
+}
