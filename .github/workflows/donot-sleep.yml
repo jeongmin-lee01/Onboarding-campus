@@ -1,0 +1,27 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: "0 0 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query 1 row to keep Supabase project awake
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/teams?select=id&limit=1" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_PUBLISHABLE_KEY")
+
+          echo "Response status: $status"
+
+          if [ "$status" -ge 400 ]; then
+            echo "Supabase 요청 실패 (status $status)"
+            exit 1
+          fi
