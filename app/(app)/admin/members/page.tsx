@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { RoleBadge } from "@/components/role-badge";
-import { Button } from "@/components/ui/button";
 import { MemberActions } from "@/components/member-actions";
 
 export const dynamic = "force-dynamic";
@@ -105,24 +104,8 @@ export default async function AdminMembersPage() {
                 {m.hire_date ?? "-"}
               </span>
               <span className="flex flex-1 items-center justify-end gap-2">
-                {m.role === "newbie" ? (
+                {m.role === "newbie" && (
                   <MemberActions member={m} teams={allTeams} mentors={mentors} />
-                ) : (
-                  <>
-                    <Button type="button" variant="outline" size="sm" disabled>
-                      수정
-                    </Button>
-                    <span
-                      className="shrink-0 rounded-sm px-2 py-0.5"
-                      style={{
-                        fontSize: 12,
-                        color: "var(--text-faint)",
-                        background: "var(--bg-sunken)",
-                      }}
-                    >
-                      준비 중
-                    </span>
-                  </>
                 )}
               </span>
             </div>
