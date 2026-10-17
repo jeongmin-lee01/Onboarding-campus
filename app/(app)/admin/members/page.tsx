@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { RoleBadge } from "@/components/role-badge";
 import { Button } from "@/components/ui/button";
+import { MemberActions } from "@/components/member-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -24,13 +25,15 @@ export default async function AdminMembersPage() {
     );
   }
 
-  const teamIds = Array.from(
-    new Set(list.map((m) => m.team_id).filter((v): v is string => Boolean(v)))
-  );
-  const { data: teams } = teamIds.length
-    ? await supabase.from("teams").select("id, name").in("id", teamIds)
-    : { data: [] as { id: string; name: string }[] };
-  const teamNameById = new Map((teams ?? []).map((t) => [t.id, t.name]));
+  const { data: teams } = await supabase
+    .from("teams")
+    .select("id, name")
+    .order("name", { ascending: true });
+  const allTeams = teams ?? [];
+  const teamNameById = new Map(allTeams.map((t) => [t.id, t.name]));
+  const mentors = list
+    .filter((m) => m.role === "mentor")
+    .map((m) => ({ id: m.id, full_name: m.full_name, team_id: m.team_id }));
 
   const nameById = new Map(list.map((m) => [m.id, m.full_name]));
 
@@ -57,7 +60,7 @@ export default async function AdminMembersPage() {
       </h1>
 
       <div className="overflow-x-auto">
-        <div className="min-w-[760px]">
+        <div className="min-w-[840px]">
           <div
             className="flex h-9 items-center gap-4 px-2"
             style={{ borderBottom: "1px solid var(--border)" }}
@@ -102,19 +105,25 @@ export default async function AdminMembersPage() {
                 {m.hire_date ?? "-"}
               </span>
               <span className="flex flex-1 items-center justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" disabled>
-                  수정
-                </Button>
-                <span
-                  className="shrink-0 rounded-sm px-2 py-0.5"
-                  style={{
-                    fontSize: 12,
-                    color: "var(--text-faint)",
-                    background: "var(--bg-sunken)",
-                  }}
-                >
-                  준비 중
-                </span>
+                {m.role === "newbie" ? (
+                  <MemberActions member={m} teams={allTeams} mentors={mentors} />
+                ) : (
+                  <>
+                    <Button type="button" variant="outline" size="sm" disabled>
+                      수정
+                    </Button>
+                    <span
+                      className="shrink-0 rounded-sm px-2 py-0.5"
+                      style={{
+                        fontSize: 12,
+                        color: "var(--text-faint)",
+                        background: "var(--bg-sunken)",
+                      }}
+                    >
+                      준비 중
+                    </span>
+                  </>
+                )}
               </span>
             </div>
           ))}
